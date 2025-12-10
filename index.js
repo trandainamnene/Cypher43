@@ -10,10 +10,14 @@ const apiRoutes = require('./routes/api');
 // Import middleware
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
+const connectDB = require('./config/db');
 
 // Khởi tạo app
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Kết nối Database
+connectDB();
 
 // Middleware cơ bản
 app.use(helmet()); // Bảo mật HTTP headers
@@ -31,6 +35,8 @@ app.get('/', (req, res) => {
   });
 });
 
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/user', require('./routes/protected'));
 app.use('/api', apiRoutes);
 
 // Error handling middleware (phải đặt cuối cùng)
