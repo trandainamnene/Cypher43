@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-// Import controllers
+// Nhập controllers
 const testController = require('../controllers/testController');
 
-// Test route
+// Route kiểm thử
 router.get('/test', testController.getTest);
 router.post('/test', testController.postTest);
 
-// Health check route
+// Route kiểm tra sức khỏe
 router.get('/health', (req, res) => {
   res.json({
     status: 'OK',

@@ -4,10 +4,10 @@ const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
 
-// Import routes
+// Nhập routes
 const apiRoutes = require('./routes/api');
 
-// Import middleware
+// Nhập middleware
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 const connectDB = require('./config/db');
@@ -22,11 +22,11 @@ connectDB();
 // Middleware cơ bản
 app.use(helmet()); // Bảo mật HTTP headers
 app.use(cors()); // Cho phép CORS
-app.use(morgan('dev')); // Logging requests
-app.use(express.json()); // Parse JSON bodies
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(morgan('dev')); // Ghi log các request
+app.use(express.json()); // Phân tích JSON bodies
+app.use(express.urlencoded({ extended: true })); // Phân tích URL-encoded bodies
 
-// Routes
+// Các routes
 app.get('/', (req, res) => {
   res.json({
     message: 'Chào mừng đến với Backend API',

@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const { protect, admin } = require('../middleware/authMiddleware');
 
-// Public route
+// Route công khai
 router.get('/public', (req, res) => {
     res.json({ message: 'Công cộng: Ai cũng xem được' });
 });
 
-// Protected route (User)
+// Route được bảo vệ (User)
 router.get('/profile', protect, (req, res) => {
     res.json({
         message: 'Đã xác thực',
@@ -15,7 +15,7 @@ router.get('/profile', protect, (req, res) => {
     });
 });
 
-// Protected route (Admin only)
+// Route được bảo vệ (Chỉ Admin)
 router.get('/admin', protect, admin, (req, res) => {
     res.json({ message: 'Admin Area: Chỉ dành cho VIP', user: req.user });
 });

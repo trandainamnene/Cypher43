@@ -9,13 +9,13 @@ const protect = async (req, res, next) => {
         req.headers.authorization.startsWith('Bearer')
     ) {
         try {
-            // Get token from header
+            // Lấy token từ header
             token = req.headers.authorization.split(' ')[1];
 
-            // Verify token
+            // Xác thực token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Get user from the token
+            // Lấy user từ token
             req.user = await User.findById(decoded.id).select('-password');
 
             next();
@@ -30,7 +30,7 @@ const protect = async (req, res, next) => {
     }
 };
 
-// Admin only middleware example
+// Ví dụ middleware chỉ dành cho Admin
 const admin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         next();

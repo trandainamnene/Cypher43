@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGO_URI, {
-            // Các options này không còn cần thiết trong Mongoose 6+ nhưng giữ lại reference nếu dùng version cũ
+            // Các tùy chọn này không còn cần thiết trong Mongoose 6+ nhưng giữ lại tham chiếu nếu dùng phiên bản cũ
             // useNewUrlParser: true,
             // useUnifiedTopology: true,
         });

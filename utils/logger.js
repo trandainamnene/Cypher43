@@ -1,5 +1,5 @@
-// Utility để logging (mẫu)
-// Bạn có thể mở rộng để sử dụng winston, pino, etc.
+// Tiện ích để ghi log (mẫu)
+// Bạn có thể mở rộng để sử dụng winston, pino, v.v.
 
 const logger = {
   info: (message, ...args) => {

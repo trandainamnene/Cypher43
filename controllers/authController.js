@@ -1,14 +1,14 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
-// Generate Access Token (Short lived, e.g., 15m)
+// Tạo Access Token (Thời gian ngắn, ví dụ: 15 phút)
 const generateAccessToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '15m',
     });
 };
 
-// Generate Refresh Token (Long lived, e.g., 7d)
+// Tạo Refresh Token (Thời gian dài, ví dụ: 7 ngày)
 const generateRefreshToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET, {
         expiresIn: '7d',
@@ -33,7 +33,7 @@ exports.register = async (req, res) => {
             const accessToken = generateAccessToken(user._id);
             const refreshToken = generateRefreshToken(user._id);
 
-            // Save refresh token to DB
+            // Lưu refresh token vào DB
             user.refreshToken = refreshToken;
             await user.save();
 
@@ -60,7 +60,7 @@ exports.login = async (req, res) => {
             const accessToken = generateAccessToken(user._id);
             const refreshToken = generateRefreshToken(user._id);
 
-            // Save refresh token to DB (rotate token)
+            // Lưu refresh token vào DB (xoay token)
             user.refreshToken = refreshToken;
             await user.save();
 
@@ -86,21 +86,21 @@ exports.refreshToken = async (req, res) => {
     }
 
     try {
-        // Verify token
+        // Xác thực token
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-        // Find user by id and matching refresh token
+        // Tìm user theo id và refresh token khớp
         const user = await User.findOne({ _id: decoded.id, refreshToken });
 
         if (!user) {
             return res.status(403).json({ message: 'Refresh token is not valid' });
         }
 
-        // Generate new tokens
+        // Tạo token mới
         const newAccessToken = generateAccessToken(user._id);
         const newRefreshToken = generateRefreshToken(user._id);
 
-        // Update refresh token in DB
+        // Cập nhật refresh token trong DB
         user.refreshToken = newRefreshToken;
         await user.save();
 
@@ -117,8 +117,8 @@ exports.refreshToken = async (req, res) => {
 
 exports.logout = async (req, res) => {
     try {
-        // Client should delete token on their side
-        // Server side we can clear the refresh token in DB
+        // Client nên xóa token ở phía họ
+        // Phía server chúng ta có thể xóa refresh token trong DB
         const { refreshToken } = req.body;
         if (refreshToken) {
             const user = await User.findOne({ refreshToken });
