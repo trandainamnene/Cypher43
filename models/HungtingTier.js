@@ -27,4 +27,4 @@ const hungtingtierSchema = new mongoose.Schema({
     }
 });
 
-exports.module = mongoose.model('HungtingTier', hungtingtierSchema);
+module.exports = mongoose.model('HungtingTier', hungtingtierSchema);

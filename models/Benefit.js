@@ -13,11 +13,11 @@ const benefitSchema = new mongoose.Schema({
     },
     description : {
         type : String,
-        reuired : true,
+        required : true,
     },
     features : {
         type : [String]
     }
 });
 
-exports.module = mongoose.model('Benefit', benefitSchema); 
+module.exports = mongoose.model('Benefit', benefitSchema); 

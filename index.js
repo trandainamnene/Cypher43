@@ -12,6 +12,10 @@ const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 const connectDB = require('./config/db');
 
+// Load tất cả models để đảm bảo chúng được đăng ký với Mongoose
+// MongoDB sẽ tự động tạo collections khi bạn lưu document đầu tiên
+require('./models');
+
 // Khởi tạo app
 const app = express();
 const PORT = process.env.PORT || 3000;

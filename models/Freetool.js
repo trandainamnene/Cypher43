@@ -13,14 +13,14 @@ const freeToolSchema = new mongoose.Schema({
     },
     description : {
         type : String,
-        reuired : true,
+        required : true,
     },
     features : {
         type : [String]
     },
     idUser : {
-        type : [Int]
+        type : [Number]
     }
 });
 
-exports.module = mongoose.model('FreeTool', freeToolSchema); 
+module.exports = mongoose.model('FreeTool', freeToolSchema); 

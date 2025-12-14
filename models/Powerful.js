@@ -24,4 +24,4 @@ const powerfulSchema = new mongoose.Schema({
     }
 });
 
-exports.module = mongoose.model('Powerful', powerfulSchema); 
+module.exports = mongoose.model('Powerful', powerfulSchema); 

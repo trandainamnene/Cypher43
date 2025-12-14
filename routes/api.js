@@ -17,5 +17,13 @@ router.get('/health', (req, res) => {
   });
 });
 
+// Import các routes cho models
+router.use('/products', require('./products'));
+router.use('/powerfuls', require('./powerfuls'));
+router.use('/features', require('./features'));
+router.use('/benefits', require('./benefits'));
+router.use('/freetools', require('./freetools'));
+router.use('/hungtingtiers', require('./hungtingtiers'));
+
 module.exports = router;
 
