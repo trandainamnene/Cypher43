@@ -4,6 +4,7 @@ const productService = require('../services/productService');
 exports.getAllProducts = async (req, res) => {
     try {
         const result = await productService.getAllProducts(req.query);
+        console.log(req.query)
         res.status(200).json({
             success: true,
             data: result.products,

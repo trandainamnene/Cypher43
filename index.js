@@ -2,7 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const helmet = require('helmet');
+const swagger = require('./swagger.js')
+//const helmet = require('helmet');
 
 // Nhập routes
 const apiRoutes = require('./routes/api');
@@ -12,8 +13,6 @@ const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 const connectDB = require('./config/db');
 
-// Load tất cả models để đảm bảo chúng được đăng ký với Mongoose
-// MongoDB sẽ tự động tạo collections khi bạn lưu document đầu tiên
 require('./models');
 
 // Khởi tạo app
@@ -24,8 +23,12 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 
 // Middleware cơ bản
-app.use(helmet()); // Bảo mật HTTP headers
-app.use(cors()); // Cho phép CORS
+//app.use(helmet()); // Bảo mật HTTP headers
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+})); // Cho phép CORS
 app.use(morgan('dev')); // Ghi log các request
 app.use(express.json()); // Phân tích JSON bodies
 app.use(express.urlencoded({ extended: true })); // Phân tích URL-encoded bodies
@@ -39,8 +42,6 @@ app.get('/', (req, res) => {
   });
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/user', require('./routes/protected'));
 app.use('/api', apiRoutes);
 
 // Error handling middleware (phải đặt cuối cùng)
@@ -51,6 +52,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+  swagger(app, PORT)
 });
 
 module.exports = app;

@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const connectDB = require('../config/db');
-
+const bcrypt = require('bcryptjs');
 // Import tất cả models
 const User = require('../models/User');
 const Product = require('../models/Product');
@@ -17,7 +17,7 @@ const seedData = async () => {
         // Kết nối database
         await connectDB();
         console.log('✅ Đã kết nối MongoDB');
-
+        
         // Xóa dữ liệu cũ (optional - comment nếu muốn giữ lại)
         console.log('🗑️  Đang xóa dữ liệu cũ...');
         await User.deleteMany({});
@@ -28,13 +28,16 @@ const seedData = async () => {
         await FreeTool.deleteMany({});
         await HungtingTier.deleteMany({});
         console.log('✅ Đã xóa dữ liệu cũ');
-
+        //
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash('admin1sssss23', salt);
+        console.log(`this password: ${hashedPassword}`);
         // Seed Users
         console.log('👤 Đang tạo Users...');
         const users = await User.insertMany([
             {
                 username: 'admin',
-                password: 'admin123', // Sẽ được hash tự động bởi pre-save hook
+                password: 'admin1sssss23', // Sẽ được hash tự động bởi pre-save hook
                 role: 'admin'
             },
             {

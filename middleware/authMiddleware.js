@@ -15,6 +15,10 @@ const protect = async (req, res, next) => {
             // Xác thực token
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+            if (typeof decoded === 'string' || !decoded.id) {
+                throw new Error('Token payload invalid');
+            }
+
             // Lấy user từ token
             req.user = await User.findById(decoded.id).select('-password');
 
