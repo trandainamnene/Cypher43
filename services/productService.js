@@ -5,20 +5,20 @@ const getAllProducts = async (query = {}) => {
     try {
         const { status, page = 1, limit = 10, sort = '-createdAt' } = query;
         const filter = {};
-        
+
         if (status) {
             filter.status = status;
         }
 
         const skip = (page - 1) * limit;
-        
+
         const products = await Product.find(filter)
             .sort(sort)
             .skip(skip)
             .limit(parseInt(limit));
-        
+
         const total = await Product.countDocuments(filter);
-        
+
         return {
             products,
             pagination: {
@@ -48,18 +48,20 @@ const getProductById = async (id) => {
 
 // Tạo product mới
 const createProduct = async (productData) => {
+    console.log(productData);
     try {
         // Tự động tăng id
         const lastProduct = await Product.findOne().sort('-id');
         const newId = lastProduct ? lastProduct.id + 1 : 1;
-        
+
         const product = await Product.create({
             ...productData,
             id: newId
         });
-        
+
         return product;
     } catch (error) {
+        console.log(error)
         throw error;
     }
 };
@@ -72,11 +74,11 @@ const updateProduct = async (id, updateData) => {
             updateData,
             { new: true, runValidators: true }
         );
-        
+
         if (!product) {
             throw new Error('Product not found');
         }
-        
+
         return product;
     } catch (error) {
         throw error;
@@ -87,11 +89,11 @@ const updateProduct = async (id, updateData) => {
 const deleteProduct = async (id) => {
     try {
         const product = await Product.findOneAndDelete({ id: parseInt(id) });
-        
+
         if (!product) {
             throw new Error('Product not found');
         }
-        
+
         return product;
     } catch (error) {
         throw error;

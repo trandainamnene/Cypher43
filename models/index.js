@@ -3,20 +3,18 @@
 
 const User = require('./User');
 const Product = require('./Product');
-const Powerful = require('./Powerful');
 const Features = require('./Features');
 const Benefit = require('./Benefit');
-const FreeTool = require('./Freetool');
+const Tool = require('./Tool');
 const HungtingTier = require('./HungtingTier');
 
 // Export tất cả models để có thể import dễ dàng
 module.exports = {
     User,
     Product,
-    Powerful,
     Features,
     Benefit,
-    FreeTool,
+    Tool,
     HungtingTier
 };
 

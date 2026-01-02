@@ -56,6 +56,7 @@ exports.login = async (req, res) => {
         const { username, password } = req.body;
         const user = await User.findOne({ username });
 
+        // @ts-ignore
         if (user && (await user.matchPassword(password))) {
             const accessToken = generateAccessToken(user._id);
             const refreshToken = generateRefreshToken(user._id);
@@ -74,6 +75,7 @@ exports.login = async (req, res) => {
             res.status(401).json({ message: 'Invalid username or password' });
         }
     } catch (error) {
+        console.log(error)
         res.status(500).json({ message: error.message });
     }
 };
@@ -88,6 +90,10 @@ exports.refreshToken = async (req, res) => {
     try {
         // Xác thực token
         const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+        if (typeof decoded === 'string') {
+            return res.status(403).json({ message: 'Invalid Refresh Token' });
+        }
 
         // Tìm user theo id và refresh token khớp
         const user = await User.findOne({ _id: decoded.id, refreshToken });
@@ -129,6 +135,40 @@ exports.logout = async (req, res) => {
         }
         res.json({ message: 'Logged out successfully' });
     } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.loginAdmin = async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username });
+
+        // @ts-ignore
+        if (user && (await user.matchPassword(password))) {
+            if (user.role !== 'admin') {
+                return res.status(403).json({ message: 'Access denied. You are not an admin.' });
+            }
+
+            const accessToken = generateAccessToken(user._id);
+            const refreshToken = generateRefreshToken(user._id);
+
+            // Lưu refresh token vào DB (xoay token)
+            user.refreshToken = refreshToken;
+            await user.save();
+
+            res.json({
+                _id: user._id,
+                username: user.username,
+                role: user.role,
+                accessToken,
+                refreshToken
+            });
+        } else {
+            res.status(401).json({ message: 'Invalid username or password' });
+        }
+    } catch (error) {
+        console.log(error)
         res.status(500).json({ message: error.message });
     }
 };

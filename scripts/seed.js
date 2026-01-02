@@ -5,10 +5,9 @@ const bcrypt = require('bcryptjs');
 // Import tất cả models
 const User = require('../models/User');
 const Product = require('../models/Product');
-const Powerful = require('../models/Powerful');
 const Features = require('../models/Features');
 const Benefit = require('../models/Benefit');
-const FreeTool = require('../models/Freetool');
+const Tool = require('../models/Tool');
 const HungtingTier = require('../models/HungtingTier');
 
 // Hàm seed dữ liệu
@@ -17,15 +16,14 @@ const seedData = async () => {
         // Kết nối database
         await connectDB();
         console.log('✅ Đã kết nối MongoDB');
-        
+
         // Xóa dữ liệu cũ (optional - comment nếu muốn giữ lại)
         console.log('🗑️  Đang xóa dữ liệu cũ...');
         await User.deleteMany({});
         await Product.deleteMany({});
-        await Powerful.deleteMany({});
         await Features.deleteMany({});
         await Benefit.deleteMany({});
-        await FreeTool.deleteMany({});
+        await Tool.deleteMany({});
         await HungtingTier.deleteMany({});
         console.log('✅ Đã xóa dữ liệu cũ');
         //
@@ -37,7 +35,7 @@ const seedData = async () => {
         const users = await User.insertMany([
             {
                 username: 'admin',
-                password: 'admin1sssss23', // Sẽ được hash tự động bởi pre-save hook
+                password: 'admin', // Sẽ được hash tự động bởi pre-save hook
                 role: 'admin'
             },
             {
@@ -118,33 +116,6 @@ const seedData = async () => {
         ]);
         console.log(`✅ Đã tạo ${products.length} products`);
 
-        // Seed Powerful
-        console.log('⚡ Đang tạo Powerful...');
-        const powerfuls = await Powerful.insertMany([
-            {
-                id: 1,
-                name: 'Advanced Analytics',
-                isPrivate: false,
-                description: 'Powerful analytics tools for data analysis',
-                features: ['Real-time Data', 'Custom Dashboards', 'Export Reports']
-            },
-            {
-                id: 2,
-                name: 'Enterprise Security',
-                isPrivate: true,
-                description: 'Enterprise-grade security features',
-                features: ['2FA', 'Encryption', 'Audit Logs', 'Role-based Access']
-            },
-            {
-                id: 3,
-                name: 'API Integration',
-                isPrivate: false,
-                description: 'Comprehensive API for third-party integrations',
-                features: ['REST API', 'Webhooks', 'GraphQL', 'Rate Limiting']
-            }
-        ]);
-        console.log(`✅ Đã tạo ${powerfuls.length} powerful items`);
-
         // Seed Features
         console.log('🎯 Đang tạo Features...');
         const features = await Features.insertMany([
@@ -206,31 +177,50 @@ const seedData = async () => {
         console.log(`✅ Đã tạo ${benefits.length} benefits`);
 
         // Seed FreeTool
-        console.log('🆓 Đang tạo FreeTools...');
-        const freeTools = await FreeTool.insertMany([
+        console.log('🆓 Đang tạo Tools...');
+        const Tools = await Tool.insertMany([
             {
                 id: 1,
                 name: 'Portfolio Tracker',
                 description: 'Free portfolio tracking tool for cryptocurrency',
                 features: ['Real-time Prices', 'Portfolio Value', 'Profit/Loss'],
-                idUser: [1, 2] // User IDs
+                idUser: [1, 2],
+                type: 'free'
             },
             {
                 id: 2,
                 name: 'Price Alert',
                 description: 'Set price alerts for your favorite cryptocurrencies',
                 features: ['Custom Alerts', 'Email Notifications', 'Multiple Coins'],
-                idUser: [1]
+                idUser: [1],
+                type: 'free'
             },
             {
                 id: 3,
                 name: 'Market News',
                 description: 'Latest cryptocurrency news and updates',
                 features: ['Daily News', 'Market Analysis', 'Trending Topics'],
-                idUser: []
+                idUser: [],
+                type: 'free'
+            },
+            {
+                id: 4,
+                name: 'Portfolio Tracker',
+                description: 'Free portfolio tracking tool for cryptocurrency',
+                features: ['Real-time Prices', 'Portfolio Value', 'Profit/Loss'],
+                idUser: [1, 2],
+                type: 'powerful'
+            },
+            {
+                id: 5,
+                name: 'Portfolio Tracker',
+                description: 'Free portfolio tracking tool for cryptocurrency',
+                features: ['Real-time Prices', 'Portfolio Value', 'Profit/Loss'],
+                idUser: [1, 2],
+                type: 'powerful'
             }
         ]);
-        console.log(`✅ Đã tạo ${freeTools.length} free tools`);
+        console.log(`✅ Đã tạo ${Tools.length} free tools`);
 
         // Seed HungtingTier
         console.log('🏆 Đang tạo HungtingTiers...');
@@ -274,10 +264,9 @@ const seedData = async () => {
         console.log('\n📊 Tổng kết:');
         console.log(`   - Users: ${users.length}`);
         console.log(`   - Products: ${products.length}`);
-        console.log(`   - Powerful: ${powerfuls.length}`);
         console.log(`   - Features: ${features.length}`);
         console.log(`   - Benefits: ${benefits.length}`);
-        console.log(`   - FreeTools: ${freeTools.length}`);
+        console.log(`   - Tools: ${Tools.length}`);
         console.log(`   - HungtingTiers: ${hungtingTiers.length}`);
 
         // Đóng kết nối

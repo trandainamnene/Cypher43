@@ -5,10 +5,9 @@ const connectDB = require('../config/db');
 // Import tất cả models
 const User = require('../models/User');
 const Product = require('../models/Product');
-const Powerful = require('../models/Powerful');
 const Features = require('../models/Features');
 const Benefit = require('../models/Benefit');
-const FreeTool = require('../models/Freetool');
+const Tool = require('../models/Tool');
 const HungtingTier = require('../models/HungtingTier');
 
 // Hàm xem dữ liệu
@@ -21,19 +20,17 @@ const viewData = async () => {
         // Đếm số lượng documents
         const userCount = await User.countDocuments();
         const productCount = await Product.countDocuments();
-        const powerfulCount = await Powerful.countDocuments();
         const featuresCount = await Features.countDocuments();
         const benefitCount = await Benefit.countDocuments();
-        const freeToolCount = await FreeTool.countDocuments();
+        const ToolCount = await Tool.countDocuments();
         const hungtingTierCount = await HungtingTier.countDocuments();
 
         console.log('📊 Số lượng documents trong mỗi collection:');
         console.log(`   - Users: ${userCount}`);
         console.log(`   - Products: ${productCount}`);
-        console.log(`   - Powerful: ${powerfulCount}`);
         console.log(`   - Features: ${featuresCount}`);
         console.log(`   - Benefits: ${benefitCount}`);
-        console.log(`   - FreeTools: ${freeToolCount}`);
+        console.log(`   - Tools: ${ToolCount}`);
         console.log(`   - HungtingTiers: ${hungtingTierCount}\n`);
 
         // Hiển thị một vài ví dụ
