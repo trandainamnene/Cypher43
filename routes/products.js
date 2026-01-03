@@ -5,6 +5,9 @@ const productController = require('../controllers/productController');
 // GET /api/products - Lấy tất cả products
 router.get('/', productController.getAllProducts);
 
+// GET /api/products/top - Lấy top products
+router.get('/top', productController.getTopProducts);
+
 // GET /api/products/:id - Lấy product theo ID
 router.get('/:id', productController.getProductById);
 

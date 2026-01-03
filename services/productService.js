@@ -3,11 +3,28 @@ const Product = require('../models/Product');
 // Lấy tất cả products
 const getAllProducts = async (query = {}) => {
     try {
-        const { status, page = 1, limit = 10, sort = '-createdAt' } = query;
+        const { status, potential, difficulty, category, page = 1, limit = 10, sort = '-createdAt' } = query;
         const filter = {};
 
         if (status) {
-            filter.status = status;
+            // Handle comma-separated list or array
+            const statusList = Array.isArray(status) ? status : status.split(',');
+            filter.status = { $in: statusList };
+        }
+
+        if (potential) {
+            const potentialList = Array.isArray(potential) ? potential : potential.split(',');
+            filter.potential = { $in: potentialList };
+        }
+
+        if (difficulty) {
+            const difficultyList = Array.isArray(difficulty) ? difficulty : difficulty.split(',');
+            filter.difficulty = { $in: difficultyList };
+        }
+
+        if (category) {
+            const categoryList = Array.isArray(category) ? category : category.split(',');
+            filter.category = { $in: categoryList };
         }
 
         const skip = (page - 1) * limit;
@@ -15,7 +32,8 @@ const getAllProducts = async (query = {}) => {
         const products = await Product.find(filter)
             .sort(sort)
             .skip(skip)
-            .limit(parseInt(limit));
+            .limit(parseInt(limit))
+            .populate('category');
 
         const total = await Product.countDocuments(filter);
 
@@ -41,6 +59,20 @@ const getProductById = async (id) => {
             throw new Error('Product not found');
         }
         return product;
+    } catch (error) {
+        throw error;
+    }
+};
+
+// Lấy top products
+const getTopProducts = async (limit = 3) => {
+    try {
+        const products = await Product.find()
+            .sort({ backers: -1 })
+            .limit(limit)
+            .select('id name token networkd feature deadline backers status image'); // Select only needed fields
+
+        return products;
     } catch (error) {
         throw error;
     }
@@ -105,6 +137,7 @@ module.exports = {
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getTopProducts
 };
 

@@ -7,64 +7,99 @@ const productSchema = new mongoose.Schema({
         unique: true,
         autoIncrement: true
     },
-    status : {
-        type : String,
+    status: {
+        type: String,
+        enum: ['Upcoming', 'Live', 'Ended'],
+        default: 'Live',
         required: true,
     },
-    feature : {
-        type : [String],
-        default : []
-    }
-    ,
     name: {
         type: String,
         required: true
     },
-    shortNamme : {
-        type : String,
-        required : true,
+    shortNamme: {
+        type: String,
+        required: true,
     },
-    description : {
-        type : String,
-        required : true,
+    description: {
+        type: String,
+        required: true,
     },
-    keyRequirements : {
-        type : [String]
+    keyRequirements: {
+        type: [String]
     },
-    supportChian : {
-        type : [String]
+    supportChian: {
+        type: [String]
     },
     price: {
-        type: Number,
+        type: String,
         required: true
     },
-    about : {
-        type : String,
-        required : true,
+    about: {
+        type: String,
+        required: true,
     },
-    toltalRise : {
-        type : Number,
-        required : true,
+    toltalRise: {
+        type: Number,
+        required: true,
     },
-    backers : {
-        type : Number,
-        required : true,
+    backers: {
+        type: Number,
+        required: true,
     },
-    deadline : {
-        type : Date,
-        required : true,
+    deadline: {
+        type: Date,
+        required: false,
     },
-    networkd : {
-        type : String,
-        required : true,
+    networkd: {
+        type: String,
+        required: true,
     },
-    token : {
-        type : String,
-        required : true,
+    token: {
+        type: String,
+        required: true,
     },
-    supportNetworks : {
-        type : [String],
-        default : []
+    supportNetworks: {
+        type: [String],
+        default: []
+    },
+    guide: {
+        type: String, // Step-by-Step Guide in HTML format
+        default: ''
+    },
+    potential: {
+        type: String,
+        enum: ['High', 'Medium', 'Low'],
+        default: 'Medium'
+    },
+    difficulty: {
+        type: String,
+        enum: ['Easy', 'Medium', 'Hard'],
+        default: 'Medium'
+    },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    },
+    image: {
+        type: String,
+        default: ''
+    },
+    website: {
+        type: String,
+        default: ''
+    },
+    twitter: {
+        type: String,
+        default: ''
+    },
+    discord: {
+        type: String,
+        default: ''
+    },
+    gitbook: {
+        type: String,
+        default: ''
     }
 });
 

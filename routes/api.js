@@ -23,7 +23,10 @@ router.use('/features', require('./features'));
 router.use('/benefits', require('./benefits'));
 router.use('/tools', require('./tool'));
 router.use('/hungtingtiers', require('./hungtingtiers'));
+router.use('/categories', require('./categories'));
 router.use('/auth', require('./auth'));
+router.use('/upload', require('./upload'));
+router.use('/users', require('./user'));
 
 module.exports = router;
 

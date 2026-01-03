@@ -34,6 +34,25 @@ exports.getProductById = async (req, res) => {
     }
 };
 
+// Lấy top products
+exports.getTopProducts = async (req, res) => {
+    try {
+        const limit = req.query.limit || 3;
+        const products = await productService.getTopProducts(limit);
+        res.status(200).json({
+            success: true,
+            data: products
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// Lấy product theo ID
+
 // Tạo product mới
 exports.createProduct = async (req, res) => {
     try {

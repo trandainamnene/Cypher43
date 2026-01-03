@@ -25,6 +25,10 @@ const ToolSchema = new mongoose.Schema({
         type: String,
         enum: ['free', 'powerful'],
         default: 'free'
+    },
+    image: {
+        type: String,
+        default: ''
     }
 });
 

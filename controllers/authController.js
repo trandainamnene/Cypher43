@@ -1,5 +1,7 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const sendEmail = require('../utils/sendEmail');
 
 // Tạo Access Token (Thời gian ngắn, ví dụ: 15 phút)
 const generateAccessToken = (id) => {
@@ -15,37 +17,87 @@ const generateRefreshToken = (id) => {
     });
 };
 
+
+
 exports.register = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { firstName, lastName, email, password } = req.body;
 
-        const userExists = await User.findOne({ username });
+        const userExists = await User.findOne({ email });
         if (userExists) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'Email này đã được sử dụng' });
         }
 
+        // Tạo verification token
+        const verificationToken = crypto.randomBytes(20).toString('hex');
+
         const user = await User.create({
-            username,
+            firstName,
+            lastName,
+            email,
+            username: email.split('@')[0], // Tự tạo username từ email
             password,
+            verificationToken,
+            verificationTokenExpire: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 giờ
         });
 
         if (user) {
-            const accessToken = generateAccessToken(user._id);
-            const refreshToken = generateRefreshToken(user._id);
+            // Gửi email xác thực (Mockup)
+            // URL thực tế của frontend
+            const verifyUrl = `${req.protocol}://localhost:5173/verify-email/${verificationToken}`;
+            const message = `Cảm ơn bạn đã đăng ký. Vui lòng click vào link sau để xác thực email: \n\n ${verifyUrl}`;
 
-            // Lưu refresh token vào DB
-            user.refreshToken = refreshToken;
-            await user.save();
+            await sendEmail({
+                email: user.email,
+                subject: 'Xác thực tài khoản AirdropAlpha',
+                message
+            });
 
             res.status(201).json({
-                _id: user._id,
-                username: user.username,
-                accessToken,
-                refreshToken
+                message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
+                // Trong môi trường dev, trả về token luôn để test cho nhanh
+                devToken: verificationToken
             });
         } else {
-            res.status(400).json({ message: 'Invalid user data' });
+            res.status(400).json({ message: 'Dữ liệu không hợp lệ' });
         }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.verifyEmail = async (req, res) => {
+    try {
+        const { token } = req.params;
+
+        const user = await User.findOne({
+            verificationToken: token,
+            verificationTokenExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Token xác thực không hợp lệ hoặc đã hết hạn' });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        user.verificationTokenExpire = undefined;
+        await user.save();
+
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        user.refreshToken = refreshToken;
+        await user.save();
+
+        res.status(200).json({
+            message: 'Email đã được xác thực thành công!',
+            _id: user._id,
+            email: user.email,
+            accessToken,
+            refreshToken
+        });
+
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -53,11 +105,23 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username });
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp email và mật khẩu' });
+        }
+
+
+        // Tìm user theo email
+        const user = await User.findOne({ email });
 
         // @ts-ignore
         if (user && (await user.matchPassword(password))) {
+            // Check verify
+            if (!user.isVerified) {
+                return res.status(401).json({ message: 'Vui lòng xác thực email trước khi đăng nhập!' });
+            }
+
             const accessToken = generateAccessToken(user._id);
             const refreshToken = generateRefreshToken(user._id);
 
@@ -67,15 +131,97 @@ exports.login = async (req, res) => {
 
             res.json({
                 _id: user._id,
-                username: user.username,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                role: user.role,
                 accessToken,
                 refreshToken
             });
         } else {
-            res.status(401).json({ message: 'Invalid username or password' });
+            res.status(401).json({ message: 'Email hoặc mật khẩu không đúng' });
         }
     } catch (error) {
         console.log(error)
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            // Bảo mật: Coi như đã gửi để tránh dò user
+            return res.status(200).json({ message: 'Nếu email tồn tại, chúng tôi đã gửi link reset password.' });
+        }
+
+        // Tạo reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        // Hash token và lưu vào DB
+        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.resetPasswordExpire = new Date(Date.now() + 10 * 60 * 1000); // 10 phút
+
+        await user.save();
+
+        // Gửi email
+        const resetUrl = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
+        const message = `Bạn nhận được email này vì yêu cầu reset mật khẩu. \n\n Vui lòng click vào link sau: \n\n ${resetUrl}`;
+
+        try {
+            await sendEmail({
+                email: user.email,
+                subject: 'Reset Password Token',
+                message
+            });
+
+            res.status(200).json({
+                message: 'Email reset password đã được gửi.',
+                // Dev only
+                devResetToken: resetToken
+            });
+        } catch (err) {
+            console.error(err);
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save();
+            return res.status(500).json({ message: 'Không thể gửi email' });
+        }
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        // Hash token từ URL để so sánh với DB
+        const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
+
+        const user = await User.findOne({
+            resetPasswordToken,
+            resetPasswordExpire: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
+        }
+
+        // Set password mới (middleware pre-save của User model sẽ tự hash)
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        await user.save();
+
+        res.status(200).json({ message: 'Mật khẩu đã được cập nhật thành công!' });
+
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
@@ -141,8 +287,16 @@ exports.logout = async (req, res) => {
 
 exports.loginAdmin = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username });
+        const { email, username, password } = req.body;
+
+        if (!password || (!email && !username)) {
+            return res.status(400).json({ message: 'Vui lòng cung cấp (Email hoặc Username) và Mật khẩu' });
+        }
+
+        // Cho phép login admin bằng cả email hoặc username
+        // Ưu tiên email nếu có
+        const query = email ? { email } : { username };
+        const user = await User.findOne(query);
 
         // @ts-ignore
         if (user && (await user.matchPassword(password))) {
@@ -165,7 +319,7 @@ exports.loginAdmin = async (req, res) => {
                 refreshToken
             });
         } else {
-            res.status(401).json({ message: 'Invalid username or password' });
+            res.status(401).json({ message: 'Invalid credentials' });
         }
     } catch (error) {
         console.log(error)

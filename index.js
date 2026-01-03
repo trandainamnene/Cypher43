@@ -30,8 +30,9 @@ app.use(cors({
   credentials: true,
 })); // Cho phép CORS
 app.use(morgan('dev')); // Ghi log các request
-app.use(express.json()); // Phân tích JSON bodies
-app.use(express.urlencoded({ extended: true })); // Phân tích URL-encoded bodies
+app.use(express.json({ limit: '50mb' })); // Phân tích JSON bodies
+app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Phân tích URL-encoded bodies
+app.use('/uploads', express.static('uploads')); // Serve file tĩnh từ thư mục uploads
 
 // Các routes
 app.get('/', (req, res) => {
