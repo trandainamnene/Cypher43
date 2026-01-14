@@ -4,11 +4,13 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
     try {
-        if (!process.env.MONGO_URI) {
-            throw new Error('MONGO_URI không được định nghĩa trong file .env');
+        const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+
+        if (!mongoURI) {
+            throw new Error('MONGO_URI (hoặc MONGODB_URI) không được định nghĩa trong env');
         }
-        
-        const conn = await mongoose.connect(process.env.MONGO_URI, {
+
+        const conn = await mongoose.connect(mongoURI, {
             // Các tùy chọn này không còn cần thiết trong Mongoose 6+ nhưng giữ lại tham chiếu nếu dùng phiên bản cũ
             // useNewUrlParser: true,
             // useUnifiedTopology: true,
