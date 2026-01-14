@@ -7,3 +7,9 @@ yarn.lock
 .env
 .env.local
 .env.production
+
+# Tutorial files (keep README_DEPLOYMENT.md and CI_CD_GUIDE.md)
+TECH_SUMMARY.md
+CI_CD_TUTORIAL.md
+CI_CD_VISUAL_GUIDE.md
+README_CI_CD.md
