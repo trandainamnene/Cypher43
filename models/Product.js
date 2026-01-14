@@ -19,7 +19,6 @@ const productSchema = new mongoose.Schema({
     },
     shortNamme: {
         type: String,
-        required: true,
     },
     description: {
         type: String,
