@@ -699,45 +699,71 @@ const DATA = {
 // Models Definition (Minimal or require existing)
 // We will require existing models to ensure schema validation matches
 const models = {
-    User: require('../models/User'),
-    Product: require('../models/Product'),
-    Features: require('../models/Features'),
-    Benefit: require('../models/Benefit'),
-    Tool: require('../models/Tool'),
-    HungtingTier: require('../models/HungtingTier'),
-    Category: require('../models/Category')
+  User: require('../models/User'),
+  Product: require('../models/Product'),
+  Features: require('../models/Features'),
+  Benefit: require('../models/Benefit'),
+  Tool: require('../models/Tool'),
+  HungtingTier: require('../models/HungtingTier'),
+  Category: require('../models/Category')
 };
 
 const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('MongoDB Connected');
-    } catch (error) {
-        console.error('Connection Error:', error.message);
-        process.exit(1);
+  try {
+    const mongoURI = process.env.MONGO_URI ||
+      process.env.MONGODB_URI ||
+      process.env.MONGO_URL ||
+      process.env.DATABASE_URL;
+
+    if (!mongoURI) {
+      console.error('❌ Error: No Mongo URI found in env');
+      process.exit(1);
     }
+
+    await mongoose.connect(mongoURI);
+    console.log('MongoDB Connected');
+  } catch (error) {
+    console.error('Connection Error:', error.message);
+    process.exit(1);
+  }
 };
 
 const restore = async () => {
-    await connectDB();
-    console.log('Starting DB Restore...');
+  await connectDB();
+  console.log('Starting DB Restore...');
 
-    for (const [name, documents] of Object.entries(DATA)) {
-        if (documents.length > 0) {
-            const Model = models[name];
-            if (Model) {
-                console.log(`Clearing ${name}...`);
-                await Model.deleteMany({});
-                console.log(`Inserting ${documents.length} docs into ${name}...`);
-                await Model.insertMany(documents);
-            } else {
-                console.warn(`Model ${name} not found, skipping.`);
-            }
+  for (const [name, documents] of Object.entries(DATA)) {
+    if (documents.length > 0) {
+      const Model = models[name];
+      if (Model) {
+        // Check if collection has data
+        const count = await Model.countDocuments();
+
+        // Only restore if empty OR if FORCE_RESTORE is true
+        if (count === 0 || process.env.FORCE_RESTORE === 'true') {
+          if (process.env.FORCE_RESTORE === 'true') {
+            console.log(`[FORCE] Clearing ${name}...`);
+            await Model.deleteMany({});
+          }
+
+          console.log(`Inserting ${documents.length} docs into ${name}...`);
+          try {
+            await Model.insertMany(documents);
+            console.log(`✅ ${name} restored successfully.`);
+          } catch (e) {
+            console.error(`❌ Error inserting ${name}: ${e.message}`);
+          }
+        } else {
+          console.log(`⚠️ ${name} has ${count} documents. Skipping restore. (Set FORCE_RESTORE=true to overwrite)`);
         }
+      } else {
+        console.warn(`Model ${name} not found, skipping.`);
+      }
     }
+  }
 
-    console.log('Restore Complete!');
-    process.exit(0);
+  console.log('Restore Complete!');
+  process.exit(0);
 };
 
 restore();

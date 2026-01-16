@@ -7,17 +7,22 @@
 1. **Sign up**: Go to [railway.app](https://railway.app) and sign in with GitHub
 2. **New Project**: Click "New Project" → "Deploy from GitHub repo"
 3. **Select repo**: Choose `BackEndCyper43`
-4. **Add MongoDB**: Click "New" → "Database" → "Add MongoDB"
-5. **Environment Variables**: Add these in Railway dashboard:
+4. **Add MongoDB (Bắt buộc)**:
+   - Click nút **"New"** (hoặc chuột phải vào khoảng trống)
+   - Chọn **Database** → **MongoDB**
+   - Đợi service khởi tạo xong (màu xanh).
+5. **Connect Database**:
+   - Click vào service **MongoDB** → Tab **Connect** → Copy **Connection URL**.
+   - Click vào service **Backend** → Tab **Variables** → New Variable.
+   - Name: `MONGO_URI`, Value: (Dán link vừa copy).
+6. **Environment Variables**: Add thêm các biến sau vào tab Variables của Backend:
    ```
-   MONGODB_URI=<Railway will auto-fill this>
-   JWT_SECRET=your-secret-key-here
-   JWT_REFRESH_SECRET=your-refresh-secret-here
+   JWT_SECRET=nhap_gi_cung_duoc_bi_mat
+   JWT_REFRESH_SECRET=nhap_gi_cung_duoc_khac
    EMAIL_USER=your-email@gmail.com
    EMAIL_PASS=your-app-password
-   PORT=3000
    ```
-6. **Deploy**: Railway will auto-deploy! 🎉
+7. **Deploy**: Railway will auto-deploy! 🎉
 
 **Cost**: Free tier includes $5/month credit
 
