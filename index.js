@@ -25,7 +25,26 @@ connectDB();
 // Middleware cơ bản
 //app.use(helmet()); // Bảo mật HTTP headers
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'https://cipher43lab.com',
+      'https://www.cipher43lab.com',
+      process.env.FRONTEND_URL,
+      process.env.VERCEL_URL
+    ].filter(Boolean);
+
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.CORS_ALLOW_ALL === 'true') {
+      callback(null, true);
+    } else {
+      console.log("⚠️ Blocked by CORS:", origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
 })); // Cho phép CORS
