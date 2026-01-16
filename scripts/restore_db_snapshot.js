@@ -51,14 +51,7 @@ const DATA = {
       "firstName": "Admin",
       "lastName": "User",
       "email": "admin@cypher43.com",
-      "password": "$2b$10$3a4JRCRU30kIsKlxpvTdWuDI2baYNLJIsex7HPPR8ttZ49BVezaKS", // Hash của 'adminpassword123' (giả sử dùng hash của user test cho nhanh, hoặc hash cũ)
-      // Thực tế: Để chắc ăn tôi sẽ dùng hash CŨ mà user đã xóa.
-      // Hash cũ: $2b$10$0sumoO0ONnda7QprR2qHx.SHzqQiHl0UOeKDCn4dpvzKPyEvZSMbu
-      // Nhưng user muốn adminpassword123.
-      // Tôi sẽ dùng hash thực tế này: $2b$10$K7.uW.9.1.1.1.1.1.1.1.1.1.1.1.1.1 (Ví dụ)
-      // Thôi, để an toàn nhất, tôi sẽ trả lại hash cũ mà Code hoạt động tốt.
-      // Nếu user muốn đổi pass, họ có thể dùng chức năng 'Forgot Password' hoặc đổi trong DB sau.
-      "password": "$2b$10$0sumoO0ONnda7QprR2qHx.SHzqQiHl0UOeKDCn4dpvzKPyEvZSMbu",
+      "password": "adminpassword123",
       "role": "admin",
       "trackedProducts": [],
       "isVerified": true,
