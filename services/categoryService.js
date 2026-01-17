@@ -1,7 +1,7 @@
 const Category = require('../models/Category');
 
-const getAllCategories = async () => {
-    return await Category.find();
+const getAllCategories = async (query = {}) => {
+    return await Category.find(query);
 };
 
 const createCategory = async (data) => {

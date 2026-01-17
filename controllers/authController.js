@@ -21,7 +21,7 @@ const generateRefreshToken = (id) => {
 
 exports.register = async (req, res) => {
     try {
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password, phoneNumber } = req.body;
 
         const userExists = await User.findOne({ email });
         if (userExists) {
@@ -35,6 +35,7 @@ exports.register = async (req, res) => {
             firstName,
             lastName,
             email,
+            phoneNumber,
             username: email.split('@')[0], // Tự tạo username từ email
             password,
             verificationToken,
@@ -49,7 +50,7 @@ exports.register = async (req, res) => {
 
             await sendEmail({
                 email: user.email,
-                subject: 'Xác thực tài khoản AirdropAlpha',
+                subject: 'Xác thực tài khoản Cipher 43 Lab',
                 message
             });
 

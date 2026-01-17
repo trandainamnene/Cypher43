@@ -23,6 +23,10 @@ const userSchema = new mongoose.Schema({
             'Please fill a valid email address'
         ]
     },
+    phoneNumber: {
+        type: String,
+        trim: true
+    },
     username: {
         type: String,
         trim: true,

@@ -27,6 +27,7 @@ router.use('/categories', require('./categories'));
 router.use('/auth', require('./auth'));
 router.use('/upload', require('./upload'));
 router.use('/users', require('./user'));
+router.use('/news', require('./news'));
 
 module.exports = router;
 

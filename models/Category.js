@@ -16,6 +16,11 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
+    },
+    type: {
+        type: String,
+        enum: ['airdrop', 'news'],
+        default: 'airdrop'
     }
 }, { timestamps: true });
 
