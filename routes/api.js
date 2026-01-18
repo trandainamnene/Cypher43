@@ -28,6 +28,7 @@ router.use('/auth', require('./auth'));
 router.use('/upload', require('./upload'));
 router.use('/users', require('./user'));
 router.use('/news', require('./news'));
+router.use('/settings', require('./settings'));
 
 module.exports = router;
 

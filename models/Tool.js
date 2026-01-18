@@ -29,6 +29,26 @@ const ToolSchema = new mongoose.Schema({
     image: {
         type: String,
         default: ''
+    },
+    about: {
+        type: String,
+        default: ''
+    },
+    howItWorks: {
+        type: [String],
+        default: []
+    },
+    useCases: {
+        type: [String],
+        default: []
+    },
+    badges: {
+        type: [String],
+        default: []
+    },
+    apiLocked: {
+        type: Boolean,
+        default: true
     }
 });
 

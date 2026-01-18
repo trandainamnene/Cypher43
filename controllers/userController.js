@@ -87,9 +87,27 @@ exports.getTrackedProducts = async (req, res) => {
 // Get all users (Admin)
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-password');
+        const { search } = req.query;
+        let query = {};
+
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            query = {
+                $or: [
+                    { username: searchRegex },
+                    { email: searchRegex },
+                    { firstName: searchRegex },
+                    { lastName: searchRegex },
+                    { phoneNumber: searchRegex }
+                ]
+            };
+        }
+
+        const users = await User.find(query).select('-password').sort({ createdAt: -1 });
+
         res.status(200).json({
             success: true,
+            count: users.length,
             data: users
         });
     } catch (error) {

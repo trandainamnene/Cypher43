@@ -47,6 +47,15 @@ const newsSchema = new mongoose.Schema({
         type: String,
         default: '5 min'
     },
+    status: {
+        type: String,
+        enum: ['draft', 'published', 'scheduled'],
+        default: 'published'
+    },
+    publishedAt: {
+        type: Date,
+        default: Date.now
+    },
     createdAt: {
         type: Date,
         default: Date.now

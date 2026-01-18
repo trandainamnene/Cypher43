@@ -5,8 +5,12 @@ const News = require('../models/News');
 // @access  Public
 exports.getNews = async (req, res) => {
     try {
-        const { category, isTrending, limit, search, page: pageQuery, sort, timeRange } = req.query;
+        const { category, isTrending, limit, search, page: pageQuery, sort, timeRange, tag, include_hidden } = req.query;
         let query = {};
+
+        if (tag) {
+            query.tags = tag;
+        }
 
         if (category) {
             query.category = category;
@@ -14,10 +18,6 @@ exports.getNews = async (req, res) => {
 
         if (isTrending) {
             query.isTrending = isTrending === 'true';
-        }
-
-        if (search) {
-            query.title = { $regex: search, $options: 'i' };
         }
 
         if (timeRange) {
@@ -33,6 +33,40 @@ exports.getNews = async (req, res) => {
             if (startDate) {
                 query.createdAt = { $gte: startDate };
             }
+        }
+
+        // Logic to combine Search and Visibility filters effectively
+        let searchConditions = null;
+        if (search) {
+            if (search.trim().startsWith('#')) {
+                const tagQuery = search.trim().substring(1);
+                if (tagQuery) { // Avoid searching for empty string if user just types "#"
+                    searchConditions = [
+                        { tags: { $regex: tagQuery, $options: 'i' } }
+                    ];
+                }
+            } else {
+                searchConditions = [
+                    { title: { $regex: search, $options: 'i' } },
+                    { tags: { $regex: search, $options: 'i' } }
+                ];
+            }
+        }
+
+        const visibilityConditions = include_hidden !== 'true' ? [
+            { status: 'published' },
+            { status: 'scheduled', publishedAt: { $lte: new Date() } }
+        ] : null;
+
+        if (searchConditions && visibilityConditions) {
+            query.$and = [
+                { $or: searchConditions },
+                { $or: visibilityConditions }
+            ];
+        } else if (searchConditions) {
+            query.$or = searchConditions;
+        } else if (visibilityConditions) {
+            query.$or = visibilityConditions;
         }
 
         let newsQuery = News.find(query);
@@ -191,6 +225,34 @@ exports.deleteNews = async (req, res) => {
         res.status(200).json({
             success: true,
             data: {}
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Server Error'
+        });
+    }
+};
+
+// @desc    Get top used tags
+// @route   GET /api/news/tags
+// @access  Public
+exports.getTopTags = async (req, res) => {
+    try {
+        const tags = await News.aggregate([
+            { $match: { status: 'published' } },
+            { $unwind: '$tags' },
+            { $group: { _id: '$tags', count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+            { $project: { _id: 0, tag: '$_id' } }
+        ]);
+
+        const tagList = tags.map(t => t.tag);
+
+        res.status(200).json({
+            success: true,
+            data: tagList
         });
     } catch (error) {
         res.status(500).json({

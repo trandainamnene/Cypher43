@@ -5,7 +5,8 @@ const {
     getNewsById,
     createNews,
     updateNews,
-    deleteNews
+    deleteNews,
+    getTopTags
 } = require('../controllers/newsController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
@@ -13,6 +14,8 @@ router
     .route('/')
     .get(getNews)
     .post(protect, admin, createNews);
+
+router.get('/tags', getTopTags);
 
 router
     .route('/:id')
