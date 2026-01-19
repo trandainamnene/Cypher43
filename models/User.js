@@ -47,6 +47,14 @@ const userSchema = new mongoose.Schema({
         enum: ['basic', 'premium'],
         default: 'basic'
     },
+    premiumStartDate: {
+        type: Date,
+        default: null
+    },
+    premiumEndDate: {
+        type: Date,
+        default: null
+    },
     trackedProducts: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'

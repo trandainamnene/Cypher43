@@ -29,6 +29,7 @@ router.use('/upload', require('./upload'));
 router.use('/users', require('./user'));
 router.use('/news', require('./news'));
 router.use('/settings', require('./settings'));
+router.use('/dashboard', require('./dashboard'));
 
 module.exports = router;
 

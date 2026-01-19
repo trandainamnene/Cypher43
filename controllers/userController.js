@@ -87,7 +87,7 @@ exports.getTrackedProducts = async (req, res) => {
 // Get all users (Admin)
 exports.getAllUsers = async (req, res) => {
     try {
-        const { search } = req.query;
+        const { search, accountType } = req.query;
         let query = {};
 
         if (search) {
@@ -101,6 +101,10 @@ exports.getAllUsers = async (req, res) => {
                     { phoneNumber: searchRegex }
                 ]
             };
+        }
+
+        if (accountType) {
+            query.accountType = accountType;
         }
 
         const users = await User.find(query).select('-password').sort({ createdAt: -1 });
@@ -120,15 +124,27 @@ exports.getAllUsers = async (req, res) => {
 exports.updateUserAccountType = async (req, res) => {
     try {
         const { id } = req.params;
-        const { accountType } = req.body;
+        const { accountType, premiumStartDate, premiumEndDate } = req.body;
 
         if (!['basic', 'premium'].includes(accountType)) {
             return res.status(400).json({ message: 'Invalid account type' });
         }
 
+        const updateData = { accountType };
+
+        // If upgrading to premium, set dates
+        if (accountType === 'premium') {
+            updateData.premiumStartDate = premiumStartDate || new Date();
+            updateData.premiumEndDate = premiumEndDate || null;
+        } else {
+            // If downgrading to basic, clear dates
+            updateData.premiumStartDate = null;
+            updateData.premiumEndDate = null;
+        }
+
         const user = await User.findByIdAndUpdate(
             id,
-            { accountType },
+            updateData,
             { new: true, runValidators: true }
         ).select('-password');
 

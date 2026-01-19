@@ -12,6 +12,23 @@ const settingsSchema = new mongoose.Schema({
         discord: { type: String, default: '' },
         facebook: { type: String, default: '' },
         youtube: { type: String, default: '' }
+    },
+    footerLinks: {
+        // Product section
+        airdrops: { type: String, default: '/opportunities' },
+        tools: { type: String, default: '/tools' },
+        news: { type: String, default: '/news' },
+        pricing: { type: String, default: '/pricing' },
+        // Company section
+        about: { type: String, default: '#' },
+        blog: { type: String, default: '/news' },
+        careers: { type: String, default: '#' },
+        contact: { type: String, default: '#' },
+        // Legal section
+        privacyPolicy: { type: String, default: '#' },
+        termsOfService: { type: String, default: '#' },
+        cookiePolicy: { type: String, default: '#' },
+        security: { type: String, default: '#' }
     }
 }, {
     timestamps: true
