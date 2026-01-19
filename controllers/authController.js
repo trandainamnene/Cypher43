@@ -43,9 +43,10 @@ exports.register = async (req, res) => {
         });
 
         if (user) {
-            // Gửi email xác thực (Mockup)
-            // URL thực tế của frontend
-            const verifyUrl = `${req.protocol}://localhost:5173/verify-email/${verificationToken}`;
+            // Gửi email xác thực
+            // Sử dụng FRONTEND_URL từ env hoặc fallback về localhost
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
             const message = `Cảm ơn bạn đã đăng ký. Vui lòng click vào link sau để xác thực email: \n\n ${verifyUrl}`;
 
             await sendEmail({
@@ -168,7 +169,8 @@ exports.forgotPassword = async (req, res) => {
         await user.save();
 
         // Gửi email
-        const resetUrl = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
         const message = `Bạn nhận được email này vì yêu cầu reset mật khẩu. \n\n Vui lòng click vào link sau: \n\n ${resetUrl}`;
 
         try {
