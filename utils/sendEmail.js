@@ -1,38 +1,35 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const sendEmail = async (options) => {
-    // 1) Create a transporter
-    console.log('--- SendEmail Config Debug ---');
-    console.log('Host:', process.env.SMTP_HOST);
-    console.log('Port:', process.env.SMTP_PORT, 'Type:', typeof process.env.SMTP_PORT);
-    console.log('User:', process.env.SMTP_EMAIL);
-    console.log('Secure:', process.env.SMTP_SECURE);
-    console.log('------------------------------');
+    console.log('--- SendEmail via Resend ---');
+    console.log('To:', options.email);
+    console.log('Subject:', options.subject);
+    console.log('----------------------------');
 
-    const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT),
-        secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
-        auth: {
-            user: process.env.SMTP_EMAIL,
-            pass: process.env.SMTP_PASSWORD
-        },
-        tls: {
-            rejectUnauthorized: false // Fix for some self-signed certs issues, though not recommended for prod
+    // Initialize Resend with API key
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    try {
+        const { data, error } = await resend.emails.send({
+            from: `${process.env.FROM_NAME || 'Cipher 43 Lab'} <${process.env.FROM_EMAIL || 'onboarding@resend.dev'}>`,
+            to: options.email,
+            subject: options.subject,
+            text: options.message,
+            html: options.html || options.message.replace(/\n/g, '<br>')
+        });
+
+        if (error) {
+            console.error('Resend Error:', error);
+            throw new Error(error.message);
         }
-    });
 
-    // 2) Define the email options
-    const mailOptions = {
-        from: `${process.env.FROM_NAME} <${process.env.FROM_EMAIL}>`,
-        to: options.email,
-        subject: options.subject,
-        text: options.message,
-        // html: 
-    };
-
-    // 3) Actually send the email
-    await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully! ID:', data.id);
+        return data;
+    } catch (error) {
+        console.error('SendEmail Error:', error);
+        throw error;
+    }
 };
 
 module.exports = sendEmail;
+
