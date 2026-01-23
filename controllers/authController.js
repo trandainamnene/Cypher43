@@ -58,7 +58,7 @@ exports.register = async (req, res) => {
             res.status(201).json({
                 message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
                 // Trong môi trường dev, trả về token luôn để test cho nhanh
-                devToken: verificationToken
+                ...(process.env.NODE_ENV === 'development' && { devToken: verificationToken })
             });
         } else {
             res.status(400).json({ message: 'Dữ liệu không hợp lệ' });
