@@ -30,6 +30,7 @@ router.use('/users', require('./user'));
 router.use('/news', require('./news'));
 router.use('/settings', require('./settings'));
 router.use('/dashboard', require('./dashboard'));
+router.use('/payment', require('./payment'));
 
 module.exports = router;
 
