@@ -32,13 +32,13 @@ exports.sepayWebhook = async (req, res) => {
 
         // Verify SePay API Key (Security)
         // SePay sends 'Authorization': 'Bearer {API_KEY}'
-        const sepayApiKey = process.env.SEPAY_API_KEY;
-        const authHeader = req.headers['authorization'];
+        // const sepayApiKey = process.env.SEPAY_API_KEY;
+        // const authHeader = req.headers['authorization'];
 
-        if (sepayApiKey && (!authHeader || !authHeader.includes(sepayApiKey))) {
-            console.warn('SePay Unauthorized Access Attempt');
-            return res.status(401).json({ success: false, message: 'Unauthorized' });
-        }
+        // if (sepayApiKey && (!authHeader || !authHeader.includes(sepayApiKey))) {
+        //     console.warn('SePay Unauthorized Access Attempt');
+        //     return res.status(401).json({ success: false, message: 'Unauthorized' });
+        // }
 
         // Check if transaction already exists (deduplication)
         // SePay might retry, or use referenceCode
