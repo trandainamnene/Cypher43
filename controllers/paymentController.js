@@ -1,5 +1,6 @@
 const Payment = require('../models/Payment');
 const User = require('../models/User');
+const { SePayPgClient } = require('sepay-pg-node');
 
 // Helper function to extract info from content
 // Assumption: Content contains "CIPHER43 {EMAIL}" or just "{EMAIL}"
@@ -114,5 +115,67 @@ exports.sepayWebhook = async (req, res) => {
     } catch (error) {
         console.error('SePay Webhook Error:', error);
         res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+};
+
+exports.createCheckoutUrl = async (req, res) => {
+    try {
+        const { plan, userId } = req.body; // plan: 'monthly' or 'yearly'
+
+        if (!plan) {
+            return res.status(400).json({ success: false, message: 'Plan is required' });
+        }
+
+        let amount = 0;
+        let description = '';
+
+        // Define pricing (VND) - Exchange Rate assumption: 1 USD = 25,000 VND
+        const RATE = 25000;
+
+        if (plan === 'monthly') {
+            amount = 49 * RATE; // 1,225,000 VND
+            description = `Thanh toan Premium 1 thang ${userId}`; // Short description for Bank Limitation
+        } else if (plan === 'yearly') {
+            amount = 470 * RATE; // 11,750,000 VND
+            description = `Thanh toan Premium 1 nam ${userId}`;
+        } else {
+            return res.status(400).json({ success: false, message: 'Invalid plan' });
+        }
+
+        // Initialize SePay Client
+        const client = new SePayPgClient({
+            env: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
+            merchant_id: process.env.SEPAY_MERCHANT_ID,
+            secret_key: process.env.SEPAY_SECRET_KEY
+        });
+
+        // Generate Order ID (Unique)
+        const orderId = `P${Date.now()}`;
+
+        const checkoutURL = client.checkout.initCheckoutUrl();
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+        const checkoutFormfields = client.checkout.initOneTimePaymentFields({
+            payment_method: 'BANK_TRANSFER',
+            order_invoice_number: orderId,
+            order_amount: amount,
+            currency: 'VND',
+            order_description: description,
+            success_url: `${frontendUrl}/payment/success`, // Simple success page
+            error_url: `${frontendUrl}/payment/error`,
+            cancel_url: `${frontendUrl}/pricing`,
+        });
+
+        res.json({
+            success: true,
+            checkoutUrl: checkoutURL,
+            params: checkoutFormfields,
+            amount,     // For debug/display UI
+            orderId
+        });
+
+    } catch (err) {
+        console.error("Create Checkout Error:", err);
+        res.status(500).json({ success: false, message: err.message });
     }
 };

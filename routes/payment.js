@@ -3,7 +3,9 @@ const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 
 // Webhook endpoint for SePay
-// SePay will POST to this URL
 router.post('/sepay-webhook', paymentController.sepayWebhook);
+
+// Create checkout link
+router.post('/create-checkout-url', paymentController.createCheckoutUrl);
 
 module.exports = router;
