@@ -8,9 +8,15 @@ router.post('/', upload.single('image'), (req, res) => {
             return res.status(400).json({ message: 'Vui lòng chọn một file ảnh' });
         }
 
-        // Tạo URL đầy đủ cho ảnh
-        // Lưu ý: req.protocol và req.get('host') sẽ lấy domain hiện tại
-        const imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        // Create URL properly based on storage type
+        let imageUrl;
+        if (req.file.path && req.file.path.startsWith('http')) {
+            // Cloudinary or S3
+            imageUrl = req.file.path;
+        } else {
+            // Local Storage
+            imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
 
         res.json({
             message: 'Image uploaded successfully',
