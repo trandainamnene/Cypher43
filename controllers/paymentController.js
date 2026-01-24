@@ -75,26 +75,35 @@ exports.sepayWebhook = async (req, res) => {
             if (user) {
                 payment.userId = user._id;
 
-                // LOGIC TO UPGRADE USER
-                // Define logic based on amount. 
-                // Ex: > 200,000 VND -> Premium 1 month?
-                // For now, I'll assume ANY 'in' transfer upgrades/extends Premium for testing.
-                // We typically need a Pricing plan mapping. 
-                // Let's assume 1 month = 1000 for now or configurable.
+                // Determine duration based on amount
+                // Thresholds (VND)
+                const YEARLY_THRESHOLD = 10000000; // ~10m VND
+                const MONTHLY_THRESHOLD = 1000000;  // ~1m VND
 
-                // Example Logic:
-                // 1 Month = X amount
-                // Since I don't know the price, I will just activate Premium for 30 days if amount > 0 for now.
+                let daysToAdd = 0;
+                const transferAmount = Number(data.transferAmount) || 0;
+
+                if (transferAmount >= YEARLY_THRESHOLD) {
+                    daysToAdd = 365;
+                } else if (transferAmount >= MONTHLY_THRESHOLD) {
+                    daysToAdd = 30;
+                } else {
+                    // Fallback/Testing: add 1 day or ignore? 
+                    // For now, let's add 7 days for small amounts/testing
+                    daysToAdd = 7;
+                }
 
                 // Update User
                 user.accountType = 'premium';
 
                 // Calculate Expiry
                 const now = new Date();
-                const currentExpiry = user.premiumEndDate && user.premiumEndDate > now ? user.premiumEndDate : now;
-                // Add 30 days
-                // Future improvement: Calculate days based on amount / daily_cost
-                const daysToAdd = 30;
+                // Ensure currentExpiry is a valid Date object
+                let currentExpiry = now;
+                if (user.premiumEndDate && !isNaN(new Date(user.premiumEndDate).getTime()) && new Date(user.premiumEndDate) > now) {
+                    currentExpiry = new Date(user.premiumEndDate);
+                }
+
                 user.premiumEndDate = new Date(currentExpiry.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
 
                 if (!user.premiumStartDate) {
