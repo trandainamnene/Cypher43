@@ -2,8 +2,6 @@ const News = require('../models/News');
 
 /**
  * Get all news with filtering, sorting and pagination
- * @param {Object} queryParams - Request query parameters
- * @returns {Object} - Result object containing data and pagination info
  */
 exports.getAllNews = async (queryParams) => {
     const { category, isTrending, limit, search, page: pageQuery, sort, timeRange, tag, include_hidden } = queryParams;
@@ -110,8 +108,6 @@ exports.getAllNews = async (queryParams) => {
 
 /**
  * Get single news by ID
- * @param {string} id - News ID
- * @returns {Object|null} - News object or null
  */
 exports.getNewsById = async (id) => {
     const news = await News.findById(id);
@@ -133,8 +129,6 @@ exports.getNewsById = async (id) => {
 
 /**
  * Create new news
- * @param {Object} newsData - Data for creating news
- * @returns {Object} - Created news object
  */
 exports.createNews = async (newsData) => {
     return await News.create(newsData);
@@ -142,9 +136,6 @@ exports.createNews = async (newsData) => {
 
 /**
  * Update news
- * @param {string} id - News ID
- * @param {Object} updateData - Data to update
- * @returns {Object|null} - Updated news object or null
  */
 exports.updateNews = async (id, updateData) => {
     const news = await News.findById(id);
@@ -161,8 +152,6 @@ exports.updateNews = async (id, updateData) => {
 
 /**
  * Delete news
- * @param {string} id - News ID
- * @returns {boolean} - True if deleted, false if not found
  */
 exports.deleteNews = async (id) => {
     const news = await News.findById(id);
@@ -177,7 +166,6 @@ exports.deleteNews = async (id) => {
 
 /**
  * Get top tags
- * @returns {Array} - List of top tags
  */
 exports.getTopTags = async () => {
     const tags = await News.aggregate([
