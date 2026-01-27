@@ -151,3 +151,38 @@ exports.createCheckoutUrl = async (plan, userId) => {
         orderId
     };
 };
+
+exports.getPaymentInfo = async (plan, userId) => {
+    if (!plan) {
+        throw new Error('Plan is required');
+    }
+
+    let amount = 0;
+    let description = '';
+
+    // Define pricing (VND) - Exchange Rate assumption: 1 USD = 25,000 VND
+    const RATE = 25000;
+
+    if (plan === 'monthly') {
+        amount = 49 * RATE; // 1,225,000 VND
+        description = `Thanh toan Premium 1 thang ${userId}`;
+    } else if (plan === 'yearly') {
+        amount = 470 * RATE; // 11,750,000 VND
+        description = `Thanh toan Premium 1 nam ${userId}`;
+    } else {
+        throw new Error('Invalid plan');
+    }
+
+    // Default Bank Info (Should be in env)
+    const bankAccount = process.env.SEPAY_BANK_ACCOUNT || 'YOUR_BANK_ACCOUNT';
+    const bankName = process.env.SEPAY_BANK_NAME || 'MBBank'; // Default or Env
+    const accountName = process.env.SEPAY_ACCOUNT_NAME || 'CYPHER43';
+
+    return {
+        amount,
+        description,
+        bankAccount,
+        bankName,
+        accountName
+    };
+};

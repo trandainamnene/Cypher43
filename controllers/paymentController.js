@@ -32,3 +32,15 @@ exports.createCheckoutUrl = async (req, res) => {
         res.status(status).json({ success: false, message: err.message });
     }
 };
+
+exports.getPaymentInfo = async (req, res) => {
+    try {
+        const { plan, userId } = req.body;
+        const result = await paymentService.getPaymentInfo(plan, userId);
+        res.json({ success: true, ...result });
+    } catch (err) {
+        console.error("Get Payment Info Error:", err);
+        const status = err.message === 'Plan is required' || err.message === 'Invalid plan' ? 400 : 500;
+        res.status(status).json({ success: false, message: err.message });
+    }
+};

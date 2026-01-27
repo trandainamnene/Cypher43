@@ -8,4 +8,7 @@ router.post('/ipn', paymentController.sepayWebhook);
 // Create checkout link
 router.post('/create-checkout-url', paymentController.createCheckoutUrl);
 
+// Get Payment Info for QR
+router.post('/info', paymentController.getPaymentInfo);
+
 module.exports = router;
