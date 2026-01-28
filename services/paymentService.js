@@ -164,7 +164,7 @@ exports.getPaymentInfo = async (plan, userId) => {
     const RATE = 25000;
 
     if (plan === 'monthly') {
-        amount = 49 * RATE; // 1,225,000 VND
+        amount = 10000; // 1,225,000 VND
         description = `Thanh toan Premium 1 thang ${userId}`;
     } else if (plan === 'yearly') {
         amount = 470 * RATE; // 11,750,000 VND
