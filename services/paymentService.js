@@ -174,9 +174,9 @@ exports.getPaymentInfo = async (plan, userId) => {
     }
 
     // Default Bank Info (Should be in env)
-    const bankAccount = process.env.SEPAY_BANK_ACCOUNT || 'YOUR_BANK_ACCOUNT';
-    const bankName = process.env.SEPAY_BANK_NAME || 'MBBank'; // Default or Env
-    const accountName = process.env.SEPAY_ACCOUNT_NAME || 'CYPHER43';
+    const bankAccount = process.env.SEPAY_BANK_ACCOUNT || 'LOCSPAY000336595';
+    const bankName = process.env.SEPAY_BANK_NAME || 'ACB'; // Default or Env
+    const accountName = process.env.SEPAY_ACCOUNT_NAME || 'PHAN DINH LOC';
 
     return {
         amount,
