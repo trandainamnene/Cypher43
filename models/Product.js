@@ -62,6 +62,10 @@ const productSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
+    featuredBackers: {
+        type: [String],
+        default: []
+    },
     guide: {
         type: String, // Step-by-Step Guide in HTML format
         default: ''
@@ -97,6 +101,10 @@ const productSchema = new mongoose.Schema({
         default: ''
     },
     gitbook: {
+        type: String,
+        default: ''
+    },
+    telegram: {
         type: String,
         default: ''
     },

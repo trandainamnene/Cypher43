@@ -23,7 +23,45 @@ const parseUserFromContent = async (content) => {
 };
 
 exports.processedWebhook = async (data) => {
-    // Check if transaction already exists (deduplication)
+    console.log('--- SEPAY IPN DATA ---', JSON.stringify(data, null, 2));
+
+    // Handle Order API IPN (Laravel snippet pattern)
+    if (data.notification_type === 'ORDER_PAID' && data.order) {
+        const invoiceNumber = data.order.order_invoice_number;
+
+        // Find payment by invoiceNumber (or code if previously saved)
+        let payment = await Payment.findOne({ invoiceNumber: invoiceNumber });
+
+        if (!payment) {
+            // If not found, create new record from Order data
+            payment = new Payment({
+                gateway: data.order.payment_method || 'OrderAPI',
+                transactionDate: new Date(),
+                accountNumber: 'N/A',
+                content: data.order.order_description || '',
+                transferAmount: data.order.order_amount,
+                invoiceNumber: invoiceNumber,
+                status: 'unprocessed'
+            });
+        }
+
+        if (payment.status === 'paid' || payment.status === 'processed') {
+            return { success: true, message: 'Order already processed' };
+        }
+
+        // Identify user from description/content
+        const user = await parseUserFromContent(data.order.order_description || '');
+        if (user) {
+            payment.userId = user._id;
+            await upgradeUserPremium(user, data.order.order_amount);
+            payment.status = 'paid';
+        }
+
+        await payment.save();
+        return { success: true };
+    }
+
+    // Handle standard Bank Transfer IPN (Original pattern)
     const existingPayment = await Payment.findOne({
         referenceCode: data.referenceCode,
         transactionDate: data.transactionDate
@@ -46,6 +84,7 @@ exports.processedWebhook = async (data) => {
         accumulated: data.accumulated,
         description: data.description,
         referenceCode: data.referenceCode,
+        invoiceNumber: data.order_invoice_number, // Some integrations send it here
         status: 'unprocessed'
     });
 
@@ -55,41 +94,8 @@ exports.processedWebhook = async (data) => {
 
         if (user) {
             payment.userId = user._id;
-
-            // Determine duration based on amount
-            const YEARLY_THRESHOLD = 10000000; // ~10m VND
-            const MONTHLY_THRESHOLD = 1000000;  // ~1m VND
-
-            let daysToAdd = 0;
-            const transferAmount = Number(data.transferAmount) || 0;
-
-            if (transferAmount >= YEARLY_THRESHOLD) {
-                daysToAdd = 365;
-            } else if (transferAmount >= MONTHLY_THRESHOLD) {
-                daysToAdd = 30;
-            } else {
-                daysToAdd = 7;
-            }
-
-            // Update User
-            user.accountType = 'premium';
-
-            // Calculate Expiry
-            const now = new Date();
-            let currentExpiry = now;
-            if (user.premiumEndDate && !isNaN(new Date(user.premiumEndDate).getTime()) && new Date(user.premiumEndDate) > now) {
-                currentExpiry = new Date(user.premiumEndDate);
-            }
-
-            user.premiumEndDate = new Date(currentExpiry.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
-
-            if (!user.premiumStartDate) {
-                user.premiumStartDate = now;
-            }
-
-            await user.save();
+            await upgradeUserPremium(user, data.transferAmount);
             payment.status = 'processed';
-            console.log(`User ${user.email} upgraded to Premium until ${user.premiumEndDate}`);
         } else {
             console.log('No user found for payment content:', data.content);
         }
@@ -97,6 +103,43 @@ exports.processedWebhook = async (data) => {
 
     await payment.save();
     return { success: true, message: 'Webhook received' };
+};
+
+// Helper to avoid duplicate code
+const upgradeUserPremium = async (user, amount) => {
+    // Determine duration based on amount
+    const YEARLY_THRESHOLD = 10000000; // ~10m VND
+    const MONTHLY_THRESHOLD = 1000000;  // ~1m VND
+
+    let daysToAdd = 0;
+    const transferAmount = Number(amount) || 0;
+
+    if (transferAmount >= YEARLY_THRESHOLD) {
+        daysToAdd = 365;
+    } else if (transferAmount >= MONTHLY_THRESHOLD) {
+        daysToAdd = 30;
+    } else {
+        daysToAdd = 7;
+    }
+
+    // Update User
+    user.accountType = 'premium';
+
+    // Calculate Expiry
+    const now = new Date();
+    let currentExpiry = now;
+    if (user.premiumEndDate && !isNaN(new Date(user.premiumEndDate).getTime()) && new Date(user.premiumEndDate) > now) {
+        currentExpiry = new Date(user.premiumEndDate);
+    }
+
+    user.premiumEndDate = new Date(currentExpiry.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
+
+    if (!user.premiumStartDate) {
+        user.premiumStartDate = now;
+    }
+
+    await user.save();
+    console.log(`User ${user.email} upgraded to Premium until ${user.premiumEndDate}`);
 };
 
 exports.createCheckoutUrl = async (plan, userId) => {
@@ -143,6 +186,19 @@ exports.createCheckoutUrl = async (plan, userId) => {
         error_url: `${frontendUrl}/payment/error`,
         cancel_url: `${frontendUrl}/pricing`,
     });
+
+    // Save pending payment record
+    const payment = new Payment({
+        gateway: 'SePay',
+        transactionDate: new Date(),
+        accountNumber: 'N/A',
+        content: description,
+        transferAmount: amount,
+        invoiceNumber: orderId,
+        userId: userId,
+        status: 'unprocessed'
+    });
+    await payment.save();
 
     return {
         checkoutUrl: checkoutURL,

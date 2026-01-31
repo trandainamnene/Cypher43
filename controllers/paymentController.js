@@ -44,3 +44,18 @@ exports.getPaymentInfo = async (req, res) => {
         res.status(status).json({ success: false, message: err.message });
     }
 };
+
+exports.handleSuccess = (req, res) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/payment/success`);
+};
+
+exports.handleError = (req, res) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/payment/error`);
+};
+
+exports.handleCancel = (req, res) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    res.redirect(`${frontendUrl}/pricing`);
+};

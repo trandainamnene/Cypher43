@@ -12,9 +12,10 @@ const paymentSchema = new mongoose.Schema({
     accumulated: { type: Number }, // Balance after transaction
     description: { type: String },
     referenceCode: { type: String }, // SePay reference code
+    invoiceNumber: { type: String }, // SePay Order Invoice Number
     // Link to User
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    status: { type: String, enum: ['processed', 'unprocessed', 'failed'], default: 'unprocessed' }
+    status: { type: String, enum: ['processed', 'unprocessed', 'failed', 'paid', 'cancelled'], default: 'unprocessed' }
 }, {
     timestamps: true
 });
