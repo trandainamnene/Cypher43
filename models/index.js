@@ -7,6 +7,7 @@ const Features = require('./Features');
 const Benefit = require('./Benefit');
 const Tool = require('./Tool');
 const HungtingTier = require('./HungtingTier');
+const Subscriber = require('./Subscriber');
 
 // Export tất cả models để có thể import dễ dàng
 module.exports = {
@@ -15,6 +16,7 @@ module.exports = {
     Features,
     Benefit,
     Tool,
-    HungtingTier
+    HungtingTier,
+    Subscriber
 };
 

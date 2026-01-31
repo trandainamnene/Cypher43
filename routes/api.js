@@ -31,6 +31,7 @@ router.use('/news', require('./news'));
 router.use('/settings', require('./settings'));
 router.use('/dashboard', require('./dashboard'));
 router.use('/payment', require('./payment'));
+router.use('/subscribers', require('./subscriber'));
 
 module.exports = router;
 
