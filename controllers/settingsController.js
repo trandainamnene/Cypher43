@@ -45,6 +45,14 @@ exports.updateSettings = async (req, res) => {
             settings.socialLinks = { ...settings.socialLinks, ...req.body.socialLinks };
         }
 
+        if (req.body.footerLinks) {
+            settings.footerLinks = { ...settings.footerLinks, ...req.body.footerLinks };
+        }
+
+        if (req.body.pricing) {
+            settings.pricing = { ...settings.pricing, ...req.body.pricing };
+        }
+
         const updatedSettings = await settings.save();
 
         res.status(200).json({

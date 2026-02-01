@@ -29,6 +29,12 @@ const settingsSchema = new mongoose.Schema({
         termsOfService: { type: String, default: '#' },
         cookiePolicy: { type: String, default: '#' },
         security: { type: String, default: '#' }
+    },
+    pricing: {
+        monthly: { type: Number, default: 49 },
+        yearly: { type: Number, default: 470 },
+        currency: { type: String, default: 'USD' },
+        exchangeRate: { type: Number, default: 25000 }
     }
 }, {
     timestamps: true

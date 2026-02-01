@@ -151,14 +151,19 @@ exports.createCheckoutUrl = async (plan, userId) => {
     let amount = 0;
     let description = '';
 
-    // Define pricing (VND) - Exchange Rate assumption: 1 USD = 25,000 VND
-    const RATE = 25000;
+    // Fetch pricing from settings
+    const Settings = require('../models/Settings');
+    let settings = await Settings.findOne();
+    if (!settings) settings = { pricing: { monthly: 49, yearly: 470, exchangeRate: 25000, currency: 'USD' } };
+
+    const pricing = settings.pricing;
+    const RATE = pricing.exchangeRate || 25000;
 
     if (plan === 'monthly') {
-        amount = 49 * RATE; // 1,225,000 VND
+        amount = (pricing.monthly || 49) * RATE;
         description = `Thanh toan Premium 1 thang ${userId}`;
     } else if (plan === 'yearly') {
-        amount = 470 * RATE; // 11,750,000 VND
+        amount = (pricing.yearly || 470) * RATE;
         description = `Thanh toan Premium 1 nam ${userId}`;
     } else {
         throw new Error('Invalid plan');
@@ -239,14 +244,19 @@ exports.getPaymentInfo = async (plan, userId) => {
     let amount = 0;
     let description = '';
 
-    // Define pricing (VND) - Exchange Rate assumption: 1 USD = 25,000 VND
-    const RATE = 25000;
+    // Fetch pricing from settings
+    const Settings = require('../models/Settings');
+    let settings = await Settings.findOne();
+    if (!settings) settings = { pricing: { monthly: 49, yearly: 470, exchangeRate: 25000, currency: 'USD' } };
+
+    const pricing = settings.pricing;
+    const RATE = pricing.exchangeRate || 25000;
 
     if (plan === 'monthly') {
-        amount = 1269000; // 1,225,000 VND
+        amount = (pricing.monthly || 49) * RATE;
         description = `Thanh toan Premium 1 thang ${userId}`;
     } else if (plan === 'yearly') {
-        amount = 470 * RATE; // 11,750,000 VND
+        amount = (pricing.yearly || 470) * RATE;
         description = `Thanh toan Premium 1 nam ${userId}`;
     } else {
         throw new Error('Invalid plan');

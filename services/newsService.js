@@ -70,6 +70,11 @@ exports.getAllNews = async (queryParams) => {
 
     let newsQuery = News.find(query);
 
+    // Optimization: Exclude heavy 'content' field for list view unless specifically requested
+    if (queryParams.include_content !== 'true') {
+        newsQuery = newsQuery.select('-content');
+    }
+
     // Sorting
     if (sort === 'popular') {
         newsQuery = newsQuery.sort({ views: -1 });
@@ -81,7 +86,7 @@ exports.getAllNews = async (queryParams) => {
 
     // Pagination
     const page = parseInt(pageQuery, 10) || 1;
-    const pageSize = parseInt(limit, 10) || 100;
+    const pageSize = parseInt(limit, 10) || 12;
     const skip = (page - 1) * pageSize;
 
     newsQuery = newsQuery.skip(skip).limit(pageSize);
