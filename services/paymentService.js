@@ -1,6 +1,7 @@
 const Payment = require('../models/Payment');
 const User = require('../models/User');
-const { SePayPgClient } = require('sepay-pg-node');
+const crypto = require('crypto');
+// const { SePayPgClient } = require('sepay-pg-node'); // Removed to use manual signing as per docs
 
 // Helper function to extract info from content
 const parseUserFromContent = async (content) => {
@@ -163,29 +164,51 @@ exports.createCheckoutUrl = async (plan, userId) => {
         throw new Error('Invalid plan');
     }
 
-    // Initialize SePay Client
-    const client = new SePayPgClient({
-        env: process.env.NODE_ENV === 'production' ? 'production' : 'sandbox',
-        merchant_id: process.env.SEPAY_MERCHANT_ID,
-        secret_key: process.env.SEPAY_SECRET_KEY
-    });
+    // Initialize SePay credentials from env
+    const merchantId = process.env.SEPAY_MERCHANT_ID;
+    const secretKey = process.env.SEPAY_SECRET_KEY;
+    const endpoint = process.env.NODE_ENV === 'production'
+        ? 'https://pay.sepay.vn/v1/checkout/init'
+        : 'https://pay-sandbox.sepay.vn/v1/checkout/init';
 
     // Generate Order ID (Unique)
     const orderId = `P${Date.now()}`;
 
-    const checkoutURL = client.checkout.initCheckoutUrl();
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-    const checkoutFormfields = client.checkout.initOneTimePaymentFields({
-        payment_method: 'BANK_TRANSFER',
-        order_invoice_number: orderId,
-        order_amount: amount,
+    const params = {
+        merchant: merchantId,
         currency: 'VND',
+        order_amount: amount,
+        operation: 'PURCHASE',
         order_description: description,
+        order_invoice_number: orderId,
+        customer_id: userId,
         success_url: `${frontendUrl}/payment/success`,
         error_url: `${frontendUrl}/payment/error`,
         cancel_url: `${frontendUrl}/pricing`,
-    });
+    };
+
+    // Sign the fields
+    const signedFieldList = [
+        'merchant', 'operation', 'payment_method', 'order_amount', 'currency',
+        'order_invoice_number', 'order_description', 'customer_id',
+        'success_url', 'error_url', 'cancel_url'
+    ];
+
+    const signedData = [];
+    for (const field of signedFieldList) {
+        if (params[field] !== undefined && params[field] !== null) {
+            signedData.push(`${field}=${params[field]}`);
+        }
+    }
+
+    const signedString = signedData.join(',');
+    const signature = crypto.createHmac('sha256', secretKey)
+        .update(signedString)
+        .digest('base64');
+
+    params.signature = signature;
 
     // Save pending payment record
     const payment = new Payment({
@@ -201,8 +224,8 @@ exports.createCheckoutUrl = async (plan, userId) => {
     await payment.save();
 
     return {
-        checkoutUrl: checkoutURL,
-        params: checkoutFormfields,
+        checkoutUrl: endpoint,
+        params: params,
         amount,
         orderId
     };
