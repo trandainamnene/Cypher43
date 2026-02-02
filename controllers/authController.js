@@ -23,28 +23,41 @@ exports.register = async (req, res) => {
     try {
         const { firstName, lastName, email, password, phoneNumber } = req.body;
 
-        const userExists = await User.findOne({ email });
-        if (userExists) {
+        let user = await User.findOne({ email });
+
+        if (user && user.isVerified) {
             return res.status(400).json({ message: 'Email này đã được sử dụng' });
         }
 
-        // Tạo verification token
         const verificationToken = crypto.randomBytes(20).toString('hex');
+        const verificationTokenExpire = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 giờ
 
-        const user = await User.create({
-            firstName,
-            lastName,
-            email,
-            phoneNumber,
-            username: email.split('@')[0], // Tự tạo username từ email
-            password,
-            verificationToken,
-            verificationTokenExpire: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 giờ
-        });
+        if (user) {
+            // Cập nhật thông tin cho user chưa verify
+            user.firstName = firstName;
+            user.lastName = lastName;
+            user.password = password;
+            user.phoneNumber = phoneNumber;
+            user.username = email.split('@')[0];
+            user.verificationToken = verificationToken;
+            user.verificationTokenExpire = verificationTokenExpire;
+            await user.save();
+        } else {
+            // Tạo user mới
+            user = await User.create({
+                firstName,
+                lastName,
+                email,
+                phoneNumber,
+                username: email.split('@')[0], // Tự tạo username từ email
+                password,
+                verificationToken,
+                verificationTokenExpire
+            });
+        }
 
         if (user) {
             // Gửi email xác thực
-            // Sử dụng FRONTEND_URL từ env hoặc fallback về localhost
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
             const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
             const message = `Cảm ơn bạn đã đăng ký. Vui lòng click vào link sau để xác thực email: \n\n <a href="${verifyUrl}">Xác thực tài khoản</a>`;
@@ -57,7 +70,6 @@ exports.register = async (req, res) => {
 
             res.status(201).json({
                 message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.',
-                // Trong môi trường dev, trả về token luôn để test cho nhanh
                 ...(process.env.NODE_ENV === 'development' && { devToken: verificationToken })
             });
         } else {
