@@ -133,7 +133,10 @@ exports.login = async (req, res) => {
         if (user && (await user.matchPassword(password))) {
             // Check verify
             if (!user.isVerified) {
-                return res.status(401).json({ message: 'Vui lòng xác thực email trước khi đăng nhập!' });
+                return res.status(403).json({
+                    message: 'Vui lòng xác thực email trước khi đăng nhập!',
+                    errorType: 'ACCOUNT_NOT_VERIFIED'
+                });
             }
 
             const accessToken = generateAccessToken(user._id);
