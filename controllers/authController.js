@@ -47,7 +47,7 @@ exports.register = async (req, res) => {
             // Sử dụng FRONTEND_URL từ env hoặc fallback về localhost
             const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
             const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
-            const message = `Cảm ơn bạn đã đăng ký. Vui lòng click vào link sau để xác thực email: \n\n ${verifyUrl}`;
+            const message = `Cảm ơn bạn đã đăng ký. Vui lòng click vào link sau để xác thực email: \n\n <a>${verifyUrl}</a>`;
 
             await sendEmail({
                 email: user.email,
