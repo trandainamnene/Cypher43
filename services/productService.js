@@ -70,7 +70,7 @@ const getTopProducts = async (limit = 3) => {
         const products = await Product.find()
             .sort({ backers: -1 })
             .limit(limit)
-            .select('id name token networkd feature deadline backers status image'); // Select only needed fields
+            .populate('category'); // Return all fields and populate category
 
         return products;
     } catch (error) {
