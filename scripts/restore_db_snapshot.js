@@ -57,7 +57,7 @@ const DATA = {
       "firstName": "Admin",
       "lastName": "User",
       "email": "admin@cypher43.com",
-      "password": "adminpassword123",
+      "password": "$2b$10$wjOjcbd5URmh4JAfjJDA/Ox9eSA9Xjkh7190OE6RgeBN3V4oEDoN6",
       "role": "admin",
       "trackedProducts": [],
       "isVerified": true,

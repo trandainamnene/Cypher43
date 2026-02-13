@@ -86,15 +86,13 @@ userSchema.pre('save', async function () {
     console.log(`this password: ${this.password}`);
 });
 
-// Mã hóa cho insert hàng loạt(test)
+// Mã hóa cho insert hàng loạt (chỉ mã hóa nếu chưa được mã hóa)
 userSchema.pre('insertMany', async function (docs) {
-    console.log(`docs: ${docs}`);
     const salt = await bcrypt.genSalt(10);
     const hashedDocs = docs.map(async (doc) => {
-        if (doc.password) {
+        // Kiểm tra xem password có tồn tại và chưa được hash (bcrypt hash thường bắt đầu bằng $2b$ hoặc $2a$)
+        if (doc.password && !doc.password.startsWith('$2b$') && !doc.password.startsWith('$2a$')) {
             doc.password = await bcrypt.hash(doc.password, salt);
-        } else {
-            console.warn(`User ${doc.name || 'ẩn danh'} bị thiếu password!`);
         }
     });
 

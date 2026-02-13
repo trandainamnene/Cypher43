@@ -72,6 +72,7 @@ exports.getAllNews = async (queryParams) => {
 
     // Optimization: Exclude heavy 'content' field for list view unless specifically requested
     if (queryParams.include_content !== 'true') {
+        // @ts-ignore
         newsQuery = newsQuery.select('-content');
     }
 

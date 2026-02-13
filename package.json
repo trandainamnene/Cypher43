@@ -14,6 +14,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "prestart": "node scripts/restore_db_snapshot.js",
     "dev": "nodemon index.js",
     "seed": "node scripts/restore_db_snapshot.js",
     "view-data": "node scripts/viewData.js",

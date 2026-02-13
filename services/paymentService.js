@@ -154,6 +154,7 @@ exports.createCheckoutUrl = async (plan, userId) => {
     // Fetch pricing from settings
     const Settings = require('../models/Settings');
     let settings = await Settings.findOne();
+    // @ts-ignore
     if (!settings) settings = { pricing: { monthly: 49, yearly: 470, exchangeRate: 25000, currency: 'USD' } };
 
     const pricing = settings.pricing;
@@ -247,6 +248,7 @@ exports.getPaymentInfo = async (plan, userId) => {
     // Fetch pricing from settings
     const Settings = require('../models/Settings');
     let settings = await Settings.findOne();
+    // @ts-ignore
     if (!settings) settings = { pricing: { monthly: 49, yearly: 470, exchangeRate: 25000, currency: 'USD' } };
 
     const pricing = settings.pricing;
