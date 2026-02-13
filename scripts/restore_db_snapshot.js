@@ -734,14 +734,39 @@ const connectDB = async () => {
   }
 };
 
+const cleanData = (obj) => {
+  if (Array.isArray(obj)) {
+    return obj.map(cleanData);
+  } else if (obj !== null && typeof obj === 'object') {
+    // Check if it's a MongoDB Extended JSON date
+    if (obj.$date) {
+      return new Date(obj.$date);
+    }
+    // Check if it's an $oid
+    if (obj.$oid) {
+      return obj.$oid;
+    }
+    // Recursively clean other properties
+    const newObj = {};
+    for (const [key, value] of Object.entries(obj)) {
+      newObj[key] = cleanData(value);
+    }
+    return newObj;
+  }
+  return obj;
+};
+
 const restore = async () => {
   await connectDB();
   console.log('Starting DB Restore...');
 
-  for (const [name, documents] of Object.entries(DATA)) {
+  for (let [name, documents] of Object.entries(DATA)) {
     if (documents.length > 0) {
       const Model = models[name];
       if (Model) {
+        // Clean documents to fix any malformed dates or objects
+        documents = cleanData(documents);
+
         // Check if collection has data
         const count = await Model.countDocuments();
 
